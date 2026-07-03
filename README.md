@@ -12,7 +12,7 @@ This project simulates a **Smart Transportation Network** modeling over 500 weig
 * **Critical Infrastructure Diagnostics (Task 5):** Diagnoses systemic single points of failure. The algorithm systematically eliminates each city node and uses Breadth-First Search (BFS) component counting to measure the resulting structural fractures, identifying the most critical vulnerabilities in the grid.
 
 ## Technical Stack
-* **Language:** C++11 (or higher)
+* **Language:** C++20 (or higher)
 * **Data Structures:** Adjacency Lists, Disjoint Set Union (DSU), Priority Queues, Hash Sets/Maps
 * **Algorithms:** Kruskal's MST, Dijkstra's Shortest Path, Breadth-First Search (BFS), Degree Centrality Analysis
 
