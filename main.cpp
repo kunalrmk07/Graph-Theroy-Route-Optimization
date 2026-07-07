@@ -1,16 +1,6 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <algorithm>
-#include <set>
-#include <map>
-#include <random>
-#include <iomanip>
-
+#include<bits/stdc++.h>
 using namespace std;
-
 const double INF = 1e9;
-
 // Structure to represent an Edge
 struct Edge {
     int u, v;
@@ -20,32 +10,53 @@ struct Edge {
     }
 };
 
-// Disjoint Set Union (DSU) for Kruskal's Algorithm
 class DSU {
-    vector<int> parent, rank;
+    vector<int>rank;
+    vector<int>par;
+    vector<int>sz;
 public:
-    DSU(int n) {
-        parent.resize(n);
-        rank.resize(n, 0);
-        for (int i = 0; i < n; i++) parent[i] = i;
-    }
-    int find(int i) {
-        if (parent[i] == i) return i;
-        return parent[i] = find(parent[i]);
-    }
-    bool unite(int i, int j) {
-        int root_i = find(i);
-        int root_j = find(j);
-        if (root_i != root_j) {
-            if (rank[root_i] < rank[root_j]) parent[root_i] = root_j;
-            else if (rank[root_i] > rank[root_j]) parent[root_j] = root_i;
-            else {
-                parent[root_j] = root_i;
-                rank[root_i]++;
-            }
-            return true;
+    DSU(int n){
+        rank.resize(n+1,0);
+        par.resize(n+1,0);
+        sz.resize(n+1,1);
+        for(int i=0;i<=n;i++) {
+            par[i]=i;
         }
-        return false;
+    }
+    int find_ultimate_par(int u){
+        if(par[u]==u) {
+            return u;
+        }
+        return par[u]=find_ultimate_par(par[u]);
+    }
+    bool unite(int x,int y){
+        int u=find_ultimate_par(x);
+        int v=find_ultimate_par(y);
+        if(u==v) return false;
+        if(rank[u]>rank[v]) {
+            par[v]=u;
+        }
+        else if (rank[v]>rank[u]) {
+            par[u]=v;
+        }
+        else {
+            rank[u]++;
+            par[v]=u;
+        }
+        return true;
+    }
+    void unite_by_size(int x,int y) {
+        int u=find_ultimate_par(x);
+        int v=find_ultimate_par(y);
+        if(u==v) return;
+        if(sz[u]>sz[v]) {
+            sz[u]+=sz[v];
+            par[v]=u;
+        }
+        else {
+            sz[v]+=sz[u];
+            par[u]=v;
+        }
     }
 };
 
@@ -59,42 +70,21 @@ public:
     SmartTransportationNetwork(int vertices) : V(vertices) {
         adj.resize(V);
     }
-
-    // Generates a random connected graph
-    void generateRandomNetwork(int extraEdges) {
-        mt19937 rng(42); // Seeded for reproducibility
-        uniform_int_distribution<int> distNode(0, V - 1);
-        uniform_real_distribution<double> distWeight(10.0, 500.0);
-
-        // Ensure graph is connected (Tree spanning all nodes)
-        for (int i = 1; i < V; i++) {
-            int u = distNode(rng) % i;
-            int v = i;
-            double w = distWeight(rng);
+    void get_input(int edges) {
+        int u,v;
+        double w;
+        while (cin >> u >> v >> w) {
             addEdge(u, v, w);
         }
-
-        // Add extra random edges for complexity
-        for (int i = 0; i < extraEdges; i++) {
-            int u = distNode(rng);
-            int v = distNode(rng);
-            if (u != v) {
-                addEdge(u, v, distWeight(rng));
-            }
-        }
     }
-
     void addEdge(int u, int v, double w) {
         adj[u].push_back({v, w});
         adj[v].push_back({u, w});
         edges.push_back({u, v, w});
     }
-
-    // ==========================================
-    // TASK 1: MST OPTIMIZATION (Kruskal's)
-    // ==========================================
+    // task1
     void task1_MST() {
-        cout << "\n--- TASK 1: MST OPTIMIZATION ---\n";
+        cout << "\nTASK 1: MST OPTIMIZATION\n";
         double originalCost = 0, mstCost = 0;
         for (auto& edge : edges) originalCost += edge.weight;
 
@@ -118,37 +108,27 @@ public:
         cout << "Cost Saved: " << savings << "%\n";
         cout << "[All " << mstEdges.size() << " structural spans successfully selected]\n";
     }
-
-    // ==========================================
-    // TASK 2: STRATEGIC CITY IDENTIFICATION
-    // ==========================================
+    // task2
     void task2_Centrality() {
-        cout << "\n--- TASK 2: STRATEGIC CITY IDENTIFICATION ---\n";
+        cout << "\nTASK 2: STRATEGIC CITY IDENTIFICATION\n";
         vector<pair<int, int>> degreeMap; // {degree, city_id}
 
         for (int i = 0; i < V; i++) {
             degreeMap.push_back({adj[i].size(), i});
         }
-
-        // Sort descending by degree
         sort(degreeMap.rbegin(), degreeMap.rend());
-
         for (int i = 0; i < 3; i++) {
             cout << "Rank " << i + 1 << " -> City " << degreeMap[i].second
                  << " -> Degree " << degreeMap[i].first << "\n";
         }
-
         cout << "\nTop Development Candidates:\n";
         cout << " * Airport: City " << degreeMap[0].second << "\n";
         cout << " * Logistics Hub: City " << degreeMap[1].second << "\n";
         cout << " * Railway Junction: City " << degreeMap[2].second << "\n";
     }
-
-    // ==========================================
-    // TASK 3: DISASTER RECOVERY ROUTING
-    // ==========================================
+    // task3
     void task3_DisasterRecovery(int src, int dest, set<int> destroyedNodes, set<pair<int,int>> destroyedEdges) {
-        cout << "\n--- TASK 3: DISASTER RECOVERY ROUTING ---\n";
+        cout << "\nTASK 3: DISASTER RECOVERY ROUTING\n";
         vector<double> dist(V, INF);
         vector<int> parent(V, -1);
         priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> pq;
@@ -170,7 +150,6 @@ public:
 
                 if (destroyedNodes.count(v)) continue;
 
-                // Check if edge is destroyed
                 pair<int,int> e1 = {u, v}, e2 = {v, u};
                 if (destroyedEdges.count(e1) || destroyedEdges.count(e2)) continue;
 
@@ -181,7 +160,6 @@ public:
                 }
             }
         }
-
         if (dist[dest] == INF) {
             cout << "Fallback state: No valid route available after disaster.\n";
         } else {
@@ -195,13 +173,9 @@ public:
             cout << "\n";
         }
     }
-
-    // ==========================================
-    // TASK 4: TRAFFIC-AWARE SMART ROUTING
-    // ==========================================
+    // task4
     void task4_TrafficRouting(int src, int dest) {
-        cout << "\n--- TASK 4: TRAFFIC-AWARE SMART ROUTING ---\n";
-        // Simple Dijkstra but dynamically scaling some edges
+        cout << "\nTASK 4: TRAFFIC-AWARE SMART ROUTING\n";
         mt19937 rng(123);
         uniform_real_distribution<double> trafficMult(1.0, 3.0);
 
@@ -220,7 +194,6 @@ public:
 
             for (auto& edge : adj[u]) {
                 int v = edge.first;
-                // Simulate real-world traffic delay mapping
                 double dynamicWeight = edge.second * trafficMult(rng);
 
                 if (dist[u] + dynamicWeight < dist[v]) {
@@ -233,10 +206,6 @@ public:
         cout << "Traffic Route Distance = " << fixed << setprecision(2) << dist[dest] << " km\n";
     }
 
-    // ==========================================
-    // TASK 5: CRITICAL INFRASTRUCTURE ANALYSIS
-    // ==========================================
-    // Helper function for BFS component counting
     int countComponents(int ignoreNode) {
         vector<bool> visited(V, false);
         int components = 0;
@@ -265,11 +234,9 @@ public:
     }
 
     void task5_CriticalAnalysis() {
-        cout << "\n--- TASK 5: CRITICAL INFRASTRUCTURE ANALYSIS ---\n";
+        cout << "\nTASK 5: CRITICAL INFRASTRUCTURE ANALYSIS\n";
         int maxComponents = 0;
         int criticalCity = -1;
-
-        // Node Elimination logic
         for (int i = 0; i < V; i++) {
             int comps = countComponents(i);
             if (comps > maxComponents) {
@@ -277,7 +244,6 @@ public:
                 criticalCity = i;
             }
         }
-
         cout << "Most Critical City: City " << criticalCity << "\n";
         cout << "Disconnected Components Created: " << maxComponents << "\n";
         cout << "[Removal of City " << criticalCity << " breaks network graph into " << maxComponents << " disconnected subgrids]\n";
@@ -285,23 +251,17 @@ public:
 };
 
 int main() {
+    // freopen("CITY_INPUT.txt", "r", stdin);
     int TOTAL_CITIES = 500;
     SmartTransportationNetwork graph(TOTAL_CITIES);
-
-    // Generate base spanning tree + 1500 random roads to make a dense network
-    graph.generateRandomNetwork(1500);
-
-    // Execute Tasks
+    graph.get_input(801);
     graph.task1_MST();
     graph.task2_Centrality();
-
-    // Simulate Disaster: City 44 and Edge between 10 and 20 are destroyed
+    // Simulate Disaster
     set<int> destroyedCities = {44, 99};
     set<pair<int,int>> destroyedRoads = {{10, 20}};
     graph.task3_DisasterRecovery(0, 250, destroyedCities, destroyedRoads);
-
     graph.task4_TrafficRouting(0, 250);
     graph.task5_CriticalAnalysis();
-
     return 0;
 }
