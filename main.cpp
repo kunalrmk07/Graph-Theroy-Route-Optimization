@@ -70,7 +70,7 @@ public:
     SmartTransportationNetwork(int vertices) : V(vertices) {
         adj.resize(V);
     }
-    void get_input(int edges) {
+    void get_input() {
         int u,v;
         double w;
         while (cin >> u >> v >> w) {
@@ -194,6 +194,7 @@ public:
 
             for (auto& edge : adj[u]) {
                 int v = edge.first;
+                // Simulate real-world traffic delay mapping
                 double dynamicWeight = edge.second * trafficMult(rng);
 
                 if (dist[u] + dynamicWeight < dist[v]) {
@@ -254,7 +255,7 @@ int main() {
     // freopen("CITY_INPUT.txt", "r", stdin);
     int TOTAL_CITIES = 500;
     SmartTransportationNetwork graph(TOTAL_CITIES);
-    graph.get_input(801);
+    graph.get_input();
     graph.task1_MST();
     graph.task2_Centrality();
     // Simulate Disaster
